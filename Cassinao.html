@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>🎰 Caça-Níquel Animado</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+        }
+        .slot {
+            font-size: 60px;
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .rolo {
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            border: 3px solid #fff;
+            border-radius: 10px;
+            background-color: #444;
+        }
+        input {
+            padding: 5px;
+            font-size: 16px;
+            width: 80px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #mensagem {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎰 Caça-Níquel Animado</h1>
+    <h2>💰 Saldo: <span id="saldo">100</span></h2>
+
+    <div class="slot">
+        <div class="rolo" id="rolo1">❔</div>
+        <div class="rolo" id="rolo2">❔</div>
+        <div class="rolo" id="rolo3">❔</div>
+    </div>
+    <div id="mensagem"></div>
+
+    <input type="number" id="aposta" min="1" placeholder="Aposta">
+    <button onclick="girar()">Girar 🎰</button>
+    <br><br>
+    <button onclick="reiniciar()">🔄 Reiniciar Jogo</button>
+
+    <script>
+        let saldo = 100;
+        const simbolos = ["🍒", "🍋", "🍊", "⭐", "💎", "7️⃣"];
+        let girando = false;
+
+        function spin() {
+            return [
+                simbolos[Math.floor(Math.random() * simbolos.length)],
+                simbolos[Math.floor(Math.random() * simbolos.length)],
+                simbolos[Math.floor(Math.random() * simbolos.length)]
+            ];
+        }
+
+        function verificar(rolos, aposta) {
+            if (rolos[0] === rolos[1] && rolos[1] === rolos[2]) {
+                if (rolos[0] === "7️⃣") return [aposta*10, "🎉 TRÊS 7️⃣! Você ganhou 10x!"];
+                if (rolos[0] === "💎") return [aposta*5, "💎 TRÊS DIAMANTES! Você ganhou 5x!"];
+                return [aposta*3, "🎉 TRÊS IGUAIS! Você ganhou 3x!"];
+            } else if (rolos[0] === rolos[1] || rolos[1] === rolos[2] || rolos[0] === rolos[2]) {
+                return [aposta*2, "🙂 DOIS IGUAIS! Você ganhou 2x!"];
+            } else {
+                return [0, "😢 Nada dessa vez."];
+            }
+        }
+
+        function girar() {
+            if (girando) return; // Evita clicar várias vezes
+            let apostaInput = document.getElementById("aposta").value;
+            let aposta = parseInt(apostaInput);
+
+            if (isNaN(aposta) || aposta <= 0) {
+                alert("Digite uma aposta válida!");
+                return;
+            }
+            if (aposta > saldo) {
+                alert("Saldo insuficiente!");
+                return;
+            }
+
+            saldo -= aposta;
+            document.getElementById("saldo").innerText = saldo;
+            girando = true;
+            document.getElementById("mensagem").innerText = "Girando... 🎰";
+
+            let finalRolos = spin();
+            let cont = 0;
+            const interval = setInterval(() => {
+                document.getElementById("rolo1").innerText = simbolos[Math.floor(Math.random() * simbolos.length)];
+                document.getElementById("rolo2").innerText = simbolos[Math.floor(Math.random() * simbolos.length)];
+                document.getElementById("rolo3").innerText = simbolos[Math.floor(Math.random() * simbolos.length)];
+                cont++;
+                if (cont > 15) { // número de “giros” da animação
+                    clearInterval(interval);
+                    // Mostrar resultado final
+                    document.getElementById("rolo1").innerText = finalRolos[0];
+                    document.getElementById("rolo2").innerText = finalRolos[1];
+                    document.getElementById("rolo3").innerText = finalRolos[2];
+
+                    let [ganho, mensagem] = verificar(finalRolos, aposta);
+                    saldo += ganho;
+                    document.getElementById("saldo").innerText = saldo;
+                    document.getElementById("mensagem").innerText = mensagem + (saldo <= 0 ? " 😞 Você ficou sem saldo!" : "");
+                    girando = false;
+                }
+            }, 100); // tempo entre cada “frame” da animação
+        }
+
+        function reiniciar() {
+            saldo = 100;
+            document.getElementById("saldo").innerText = saldo;
+            document.getElementById("rolo1").innerText = "❔";
+            document.getElementById("rolo2").innerText = "❔";
+            document.getElementById("rolo3").innerText = "❔";
+            document.getElementById("mensagem").innerText = "";
+        }
+    </script>
+</body>
+</html>
